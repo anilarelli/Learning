@@ -89,7 +89,7 @@ output:
 ```
 ### limitations :-
 
-*  XXE can only be used to obtain files or responses that contain “valid” XML.
+*  XXE can only be used to obtain files or responses that contain “valid” XML or text.
 *  XXE cannot be used to obtain binary files.
 * It is difficult to exfiltrate plain text files that are not valid XML files (e.g. files that contain XML special characters such as &, < and >)
 

@@ -19,7 +19,7 @@ To reference a parameter entity, you need to use %entityName; inside the DTD.
 
 #### Examples of Parameter Entities
 
-##### 1. Basic Parameter Entity Usage
+#### 1. Basic Parameter Entity Usage
 
 <!DOCTYPE root [
    <!ENTITY % greeting "Hello, World!">
@@ -42,15 +42,15 @@ To use the parameter entity, you need to declare an additional general entity:
 
 Here, myGreeting is a general entity that uses the value of the parameter entity %greeting.
 
-##### 2. Including an External DTD Using Parameter Entities
+#### 2. Including an External DTD Using Parameter Entities
 You can use parameter entities to include external DTDs, making the DTD modular and easier to maintain.
 
 
-##### External DTD (common.dtd):
+#### External DTD (common.dtd):
 
 <!ENTITY % commonElements "<!ELEMENT greeting (#PCDATA)>">
 
-##### Main XML File:
+#### Main XML File:
 
 <!DOCTYPE root [
    <!ENTITY % common SYSTEM "http://example.com/common.dtd">
@@ -66,7 +66,7 @@ The parameter entity %common references an external DTD file located at http://e
 %commonElements; is used to insert the content from the external DTD (in this case, an element declaration).
 
 
-##### 3. Conditional DTD Sections Using Parameter Entities
+#### 3. Conditional DTD Sections Using Parameter Entities
 Parameter entities can be used to include or exclude parts of a DTD based on conditional sections.
 
 <!DOCTYPE root [

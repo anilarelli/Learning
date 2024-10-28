@@ -87,13 +87,7 @@ output:
                                                    |
                                                    | --> This is Actual xml content
 ```
-### limitations :-
 
-*  XXE can only be used to obtain files or responses that contain “valid” XML or text.
-*  XXE cannot be used to obtain binary files.
-* It is difficult to exfiltrate plain text files that are not valid XML files (e.g. files that contain XML special characters such as &, < and >)
-
-* `CDATA` - used to make the XML parser interpret contents as text data and not as markup
 
 
 
@@ -337,5 +331,12 @@ Given the following definition and body:
 When an entity is defined more than once, the XML parser will assume the first match and drop the remaining.
 
 
+### limitations :-
 
+*  XXE can only be used to obtain files or responses that contain “valid” XML or text.
+* It is difficult to exfiltrate plain text files that are not valid XML files (e.g. files that contain XML special characters such as &, < and >)
+
+* `CDATA` - used to make the XML parser interpret contents as text data and not as markup
+
+## CDATA Enters the chat
 

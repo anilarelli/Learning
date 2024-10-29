@@ -340,3 +340,6 @@ When an entity is defined more than once, the XML parser will assume the first m
 
 ## CDATA Enters the chat
 
+* In the case of "<", this is due to parser scanning for the start of an XML node. If the content does not form a proper XML node, the parser would raise exceptions like "lxml.etree._raiseParseError XMLSyntaxError: chunk is not well balanced". A well-form XML <test></test> would not face such error.
+
+* In the case of "&", this is due to parser scanning for an entity's name. Without a proper entity syntax, the parser would raise exceptions like "lxml.etree._raiseParseError XMLSyntaxError: xmlParseEntityRef: no name". A well-formed XML entity syntax like &gt; would not face such error.

@@ -343,3 +343,9 @@ When an entity is defined more than once, the XML parser will assume the first m
 * In the case of "<", this is due to parser scanning for the start of an XML node. If the content does not form a proper XML node, the parser would raise exceptions like "lxml.etree._raiseParseError XMLSyntaxError: chunk is not well balanced". A well-form XML <test></test> would not face such error.
 
 * In the case of "&", this is due to parser scanning for an entity's name. Without a proper entity syntax, the parser would raise exceptions like "lxml.etree._raiseParseError XMLSyntaxError: xmlParseEntityRef: no name". A well-formed XML entity syntax like &gt; would not face such error.
+
+* If the file content can be surround by <![CDATA[ and ]]> , the file content can be retrievable.
+
+* This requires a wrapper and the knowledge of the Internal Subset Problem comes to our rescue.
+
+* However, if the length of the file with illegal characters is too large, XML parser will attempt to throw "XMLSyntaxError: Detected an entity reference loop" as it attempts to stop billion laughter attacks.

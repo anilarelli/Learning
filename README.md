@@ -1,4 +1,4 @@
-# XXE Indepth
+# Mastering XXE Exploitation
 
 ## ENTITY
 

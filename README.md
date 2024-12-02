@@ -4,7 +4,10 @@
 
 ### 1.Internal Entity
 
-##### Definition:
+##### Definition:  	
+
+XML allows custom entities to be defined within the DTD.
+
 
 ```python
 <!ENTITY entityname "Hello">
@@ -25,6 +28,9 @@
 ## 2. External Entity
 
 ### Definition:
+
+
+XML external entities are a type of custom entity whose definition is located outside of the DTD where they are declared.The declaration of an external entity uses the SYSTEM keyword and must specify a URL from which the value of the entity should be loaded.
 
 ```python
 <!ENTITY includeme SYSTEM "include.xml">
@@ -236,7 +242,7 @@ In this XXE example, an external file `(/etc/passwd)` is accessed and sent to an
 
 
 
-2. ## Entity Reference Loops
+2. #### Entity Reference Loops
    
    Defining parameter entities that reference each other in a circular manner can cause infinite loops:
 

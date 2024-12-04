@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Send Xml Request </title>
+	</head>
+	<body>
+
+		<form id="xmlForm"  action="http://localhost:5000/xxe" method="POST">
+			<textarea name="xmlData" rows="15 cols="5000" style="width: 374px; height: 253px;"
+<?xml version="1.0"?>
+
+<user>
+<name>john Doe</name>
+<age>30</age>
+</user>
+
+			</textarea>
+			<br>
+		
+			<input type="submit" value="Send">
+		</form>
+
+	</body>
+	<html>
+

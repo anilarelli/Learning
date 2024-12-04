@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<p> XSS in HTML tag attribute </p>
+</head>
+<body>
+	<h1>Search<h1>
+			<form id="searchForm">
+				<lable for="query">Search:</lable>
+				<input type="text" id="query" name="query" required>
+				<button type="button" onclick="search()">Search</button>
+
+			</form>
+			<div id="searchResults"></div>
+
+			<script>
+				function search() {
+					var query = document.getElementById('query').value;
+					xhr.onreadystatechange = function() {
+						if (xhr.readyState ==4 && xhr.status==200) {
+							document.getElmentById('searchResults').innerHtml = xhr.responseText;
+						}
+					};
+
+					xhr.open('GET', '/html_entities?query=' + encodeURIComponent(query), true);
+					xhr.send();
+
+				}
+			</script>
+
+</body>
+</html>

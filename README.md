@@ -594,6 +594,9 @@ Once the Web Application processes the line "<Response>&send;</Response>",  the 
 
 ![image](https://github.com/user-attachments/assets/4d87f9d3-0ce3-4710-9116-99523e49c72c)
 
+![image](https://github.com/user-attachments/assets/8fec6433-da91-4296-8dfc-a0345ae37a27)
+
+
 
 ### PHP Remote Code Execution
 

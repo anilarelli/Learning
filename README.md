@@ -507,7 +507,7 @@ For example, an application might allow users to upload images, and process or v
 
 ```python
    	POST /action HTTP/1.0
-   	Content-Type: text/xml
+   	Content-Type: text/xml or Content-Type: application/xml;charset=UTF-8
   	Content-Length: 52
 
   	<?xml version="1.0" encoding="UTF-8"?><foo>bar</foo>

